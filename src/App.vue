@@ -21,12 +21,12 @@
                 li.navbar-item(
                   v-for="link in linkMenu"
                   :key="link.title"
-                  @click="menuShow = !menuShow"
+                  @click="menuShow = false"
                 )
                   router-link.navbar-link(
                     :to="`${link.url}`"
                   )  {{ link.title }}
-    .content-wrapper
+    router-view
 </template>
 
 <script>
@@ -38,7 +38,7 @@ export default {
         { title: 'Home', url: '/' },
         { title: 'Login', url: '/login' },
         { title: 'Registration', url: '/registration' },
-        { title: 'About Us', url: '/aboutUs' }
+        { title: 'About Us', url: '/about' }
       ]
     }
   }
