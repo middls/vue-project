@@ -37,7 +37,8 @@ export default {
       linkMenu: [
         { title: 'Home', url: '/' },
         { title: 'Login', url: '/login' },
-        { title: 'Registration', url: '/registration' }
+        { title: 'Registration', url: '/registration' },
+        { title: 'About Us', url: '/aboutUs' }
       ]
     }
   }
