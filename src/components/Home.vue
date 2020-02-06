@@ -5,7 +5,7 @@
         h1.ui-title-1 HOME
         input(
           type='text'
-        placeholder='Что будем смотреть?'
+          placeholder='Что будем смотреть?'
           v-model="taskTitle"
           v-on:keyup.enter="newTask"
         )
@@ -33,30 +33,45 @@
           label(
             for='radioSerial'
           ) Serial
-    section
-      .container
-        .task-list
-          .task-item(
-            v-for="task in tasks"
-            :key="task.id"
-            :class="{ completed: task.completed }"
+        .total-time
+          .total-time__film(
+            v-if="whatWatch === 'Film'"
           )
-            .ui-card.ui-card--shadow
-              .task-item__info
-                .task-item__main-info
-                  span.ui-label.ui-label--light {{ task.whatWatch }}
-                  span Total Time:
-                span.button-close
-              .task-item__content
-                .task-item__header
-                  .ui-checkbox-wrapper
-                    input.ui-checkbox(
-                      type='checkbox'
-                      v-model="task.completed"
-                    )
-                  span.ui-title-3 {{ task.title }}
-                .task-item__body
-                  span.ui-text-regular {{ task.description }}
+            span.time-title Hours
+            input.time-input(
+              type='number'
+              v-model="filmHours"
+            )
+            span.time-title Minutes
+            input.time-input(
+              type='number'
+              v-model="filmMinutes"
+            )
+            p {{ filmTime }}
+          .total-time__serial(
+            v-if="whatWatch === 'Serial'"
+          )
+            span.time-title How many seasons?
+            input.time-input(
+              type='number'
+              v-model="serialSeasons"
+            )
+            span.time-title How many series?
+            input.time-input(
+              type='number'
+              v-model="serialSeries"
+            )
+            span.time-title How long is one series?
+            input.time-input(
+              type='number'
+              v-model="serialSeriesMinutes"
+            )
+            p {{ serialTime }}
+        .tag-list
+          .ui-tag__wrapper
+            .ui-tag
+              span.tag-title Fantasy
+              span.button-close
 </template>
 
 <script>
@@ -67,24 +82,13 @@ export default {
       taskId: 3,
       taskDescription: '',
       whatWatch: '',
-      tasks: [
-        {
-          'id': 1,
-          'title': 'joker',
-          'description': 'about joker',
-          'whatWatch': 'Film',
-          'completed': false,
-          'editing': false
-        },
-        {
-          'id': 2,
-          'title': 'The Witcher',
-          'description': 'new serial from Netflix',
-          'whatWatch': 'Serial',
-          'completed': false,
-          'editing': false
-        }
-      ]
+      // time film
+      filmHours: 1,
+      filmMinutes: 30,
+      // time serial
+      serialSeasons: 1,
+      serialSeries: 10,
+      serialSeriesMinutes: 45
     }
   },
   methods: {
@@ -92,48 +96,74 @@ export default {
       if (this.taskTitle === '') {
         return {}
       }
-      this.tasks.push({
+      let totalTime
+      if (this.whatWatch === 'Film') {
+        totalTime = this.filmTime
+      } else {
+        totalTime = this.serialTime
+      }
+      const task = {
         id: this.taskId,
         title: this.taskTitle,
         description: this.taskDescription,
         whatWatch: this.whatWatch,
+        totalTime,
         completed: false,
         editing: false
-      })
+      }
+      console.log(task)
       this.taskId += 1
       this.taskTitle = ''
       this.taskDescription = ''
+    },
+    getHoursAndMinutes (minutes) {
+      let hours = Math.trunc(minutes / 60)
+      let min = minutes % 60
+      return hours + ' Hours ' + min + ' Minutes'
+    }
+  },
+  computed: {
+    filmTime () {
+      let min = (this.filmHours * 60) + (this.filmMinutes * 1)
+      return this.getHoursAndMinutes(min)
+    },
+    serialTime () {
+      let min = (this.serialSeasons * this.serialSeries * this.serialSeriesMinutes)
+      return this.getHoursAndMinutes(min)
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-  .task-item {
-    margin-bottom: 20px;
-    &:last-child {
-       margin-bottom: 0;
-     }
-  }
-  .ui-label {
-    margin-right: 8px;
-  }
-  .ui-title-3 {
-    margin-bottom: 0;
-  }
-  .task-item__info {
+  .option-list {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+
+    label {
+      margin-right: 15px;
+      margin-bottom: 0;
+    }
+
+    .what-watch--radio {
+      margin-right: 7px;
+      margin-bottom: 0;
+    }
   }
-  .task-item__header {
-    display: flex;
-    align-items: center;
+
+  .total-time {
+    margin-top: 15px;
   }
-  .ui-checkbox-wrapper {
-    margin-right: 8px;
+
+  .tag-list {
+    margin-top: 15px;
   }
-  .task-item__body {
-    margin-top: 20px;
+  .time-title {
+    display: block;
+    margin-bottom: 6px;
+  }
+  .time-input {
+    max-width: 80px;
+    margin-right: 10px;
   }
 </style>
