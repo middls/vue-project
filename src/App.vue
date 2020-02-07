@@ -50,10 +50,20 @@ export default {
   body {
     background: linear-gradient(45deg, rgb(19, 73, 95), rgb(118, 75, 226), rgb(131, 115, 198), rgb(119, 211, 185)) fixed;
   }
-
+  input[type=text],
+  textarea,
+  input[type=number] {
+    color: #fff;
+    border: 2px solid #fff;
+  }
+  label {
+    color: #fff;
+  }
+  input::placeholder {
+    color: #fff;
+  }
   .navbar {
     border-bottom: 0;
-
     .navbar-item {
       transition: all 150ms linear;
       .button {
