@@ -68,6 +68,27 @@
                 v-model="serialSeriesMinutes"
               )
               p {{ serialTime }}
+          .tag-list.tag-list--add
+            .ui-tag__wrapper(
+              @click="tagMenuShow = !tagMenuShow"
+            )
+              .ui-tag
+                span.tagTitle Add New
+                span.button-close(
+                  :class="{ active: !tagMenuShow }"
+                )
+          .tag-list.tag-list--menu(
+            v-if="tagMenuShow"
+          )
+            input.tag-add--input(
+              type="text"
+              placeholder="New tag"
+              v-model="tagTitle"
+              @keyup.enter="newTag"
+            )
+            .button.button--round.button-default(
+              @click="newTag"
+            ) Send
           .tag-list
             .ui-tag__wrapper(
               v-for="tag in tags"
@@ -75,10 +96,14 @@
             )
               .ui-tag(
                 @click="addTagUsed(tag)"
-                :class="{active: tag.use}"
+                :class="{used: tag.use}"
               )
                 span.tag-title {{ tag.title }}
                 span.button-close
+          p {{ tagsUsed }}
+          .button.button--round.button-default(
+            @click="newTask"
+          ) Send
 </template>
 
 <script>
@@ -86,7 +111,6 @@ export default {
   data () {
     return {
       taskTitle: '',
-      taskId: 3,
       taskDescription: '',
       whatWatch: '',
       // time film
@@ -96,24 +120,34 @@ export default {
       serialSeasons: 1,
       serialSeries: 10,
       serialSeriesMinutes: 45,
-
-      tags: [
-        {
-          title: 'Fantasy',
-          use: false
-        },
-        {
-          title: 'Drama',
-          use: false
-        },
-        {
-          title: 'Action',
-          use: false
-        }
-      ]
+      // tag
+      tagTitle: '',
+      tagMenuShow: false,
+      tagsUsed: []
     }
   },
   methods: {
+    newTag () {
+      if (this.tagTitle === '') {
+        return {}
+      }
+      const tag = {
+        title: this.tagTitle,
+        use: false
+      }
+      this.$store.dispatch('newTag', tag)
+      this.tagTitle = ''
+    },
+    addTagUsed (tag) {
+      tag.use = !tag.use
+      if (tag.use) {
+        this.tagsUsed.push({
+          title: tag.title
+        })
+      } else {
+        this.tagsUsed.splice(tag.title, 1)
+      }
+    },
     newTask () {
       if (this.taskTitle === '') {
         return {}
@@ -125,23 +159,22 @@ export default {
         totalTime = this.serialTime
       }
       const task = {
-        id: this.taskId,
         title: this.taskTitle,
         description: this.taskDescription,
         whatWatch: this.whatWatch,
         totalTime,
+        tags: this.tagsUsed,
         completed: false,
         editing: false
       }
+      this.$store.dispatch('newTask', task)
       console.log(task)
-      this.taskId += 1
       this.taskTitle = ''
       this.taskDescription = ''
-    },
-    addTagUsed (tag) {
-      tag.use = !tag.use
-      if (tag.use) {
+      this.tagsUsed = []
 
+      for (let i = 0; i < this.tags.length; i++) {
+        this.tags[i].use = false
       }
     },
     getHoursAndMinutes (minutes) {
@@ -151,6 +184,9 @@ export default {
     }
   },
   computed: {
+    tags () {
+      return this.$store.getters.tags
+    },
     filmTime () {
       let min = (this.filmHours * 60) + (this.filmMinutes * 1)
       return this.getHoursAndMinutes(min)
@@ -164,17 +200,28 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .ui-tag{
+  .ui-tag {
     color: #fff;
     border: 2px solid #ffffff;
+
     .button-close:before,
     .button-close:after {
-      background-color: #fff ;
+      background-color: #fff;
     }
   }
+
+  .used {
+    background-color: blue;
+  }
+
   .ui-tag__wrapper:not(:last-child) {
     margin-right: 10px;
   }
+
+  .ui-tag__wrapper {
+    margin-bottom: 15px;
+  }
+
   .option-list {
     display: flex;
     align-items: center;
@@ -189,26 +236,54 @@ export default {
       margin-bottom: 0;
     }
   }
+
   .total-time {
     margin-top: 15px;
   }
+
   .tag-list {
     margin-top: 15px;
   }
+
   .time-title {
     display: block;
     margin-bottom: 6px;
   }
+
   .time-input {
     max-width: 80px;
     margin-right: 10px;
   }
+
   .time-title {
     color: #fff
   }
+
   p {
     color: #fff;
   }
+
+  .ui-tag {
+    .button-close {
+      &.active {
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  .tag-list--menu {
+    display: flex;
+    align-items: center;
+
+    input {
+      margin-bottom: 0;
+    }
+
+    .button--round {
+      margin-left: 10px;
+    }
+  }
+
   $md-radio-checked-color: rgb(250, 250, 250);
   $md-radio-border-color: rgba(250, 250, 250);
   $md-radio-size: 20px;
@@ -226,7 +301,8 @@ export default {
       box-shadow: 0px 0px 0px $md-radio-ripple-size rgba(250, 250, 250, 0);
     }
   }
-  .option-list{
+
+  .option-list {
     margin: 16px 0;
 
     input[type="radio"] {

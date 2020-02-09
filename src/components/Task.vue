@@ -2,10 +2,22 @@
   .content-wrapper
     section
       .container
-        h1.ui-title-1 Task
+        .task-list__header
+         h1.ui-title-1 Task
+         .buttons-list
+           p {{filter }}
+           .button.button--round.button-default(
+           @click="filter = 'active'"
+           ) Active
+           .button.button--round.button-default(
+           @click="filter = 'completed'"
+           ) Completed
+           .button.button--round.button-default(
+           @click="filter = 'all'"
+           ) All
         .task-list
           .task-item(
-            v-for="task in tasks"
+            v-for="task in tasksFilter"
             :key="task.id"
             :class="{ completed: task.completed }"
           )
@@ -13,7 +25,7 @@
               .task-item__info
                 .task-item__main-info
                   span.ui-label.ui-label--light {{ task.whatWatch }}
-                  span Total Time:
+                  span Total Time: {{ task.totalTime }}
                 span.button-close
               .task-item__content
                 .task-item__header
@@ -25,30 +37,33 @@
                   span.ui-title-3 {{ task.title }}
                 .task-item__body
                   span.ui-text-regular {{ task.description }}
+                .task-item__footer
+                  .tag-list
+                    .ui-tag__wrapper(
+                      v-for="tag in task.tags"
+                      :key="tag.title"
+                    )
+                      .ui-tag
+                        span.tag-title {{ tag.title }}
 </template>
 
 <script>
 export default {
   data () {
     return {
-      tasks: [
-        {
-          'id': 1,
-          'title': 'joker',
-          'description': 'about joker',
-          'whatWatch': 'Film',
-          'completed': false,
-          'editing': false
-        },
-        {
-          'id': 2,
-          'title': 'The Witcher',
-          'description': 'new serial from Netflix',
-          'whatWatch': 'Serial',
-          'completed': false,
-          'editing': false
-        }
-      ]
+      filter: 'active'
+    }
+  },
+  computed: {
+    tasksFilter () {
+      if (this.filter === 'active') {
+        return this.$store.getters.taskNotCompleted
+      } else if (this.filter === 'completed') {
+        return this.$store.getters.taskCompleted
+      } else if (this.filter === 'all') {
+        return this.$store.getters.tasks
+      }
+      return this.filter === 'active'
     }
   }
 }
