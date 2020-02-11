@@ -26,6 +26,11 @@
                   router-link.navbar-link.button.hover-shadow(
                     :to="`${link.url}`"
                   )  {{ link.title }}
+                li.navbar-item(
+                  v-if="checkUser"
+                  @click="logOut"
+                )
+                  span.navbar-link Log Out
     router-view
 </template>
 
@@ -33,10 +38,27 @@
 export default {
   data () {
     return {
-      menuShow: false,
-      linkMenu: [
-        { title: 'Home', url: '/' },
-        { title: 'Task', url: '/task' },
+      menuShow: false
+    }
+  },
+  methods: {
+    logOut () {
+      this.$store.dispatch('logoutUser')
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    checkUser () {
+      return this.$store.getters.checkUser
+    },
+    linkMenu () {
+      if (this.checkUser) {
+        return [
+          { title: 'Home', url: '/' },
+          { title: 'Task', url: '/task' }
+        ]
+      }
+      return [
         { title: 'Login', url: '/login' },
         { title: 'Registration', url: '/registration' }
       ]
@@ -50,24 +72,31 @@ export default {
   body {
     background: linear-gradient(45deg, rgb(19, 73, 95), rgb(118, 75, 226), rgb(131, 115, 198), rgb(119, 211, 185)) fixed;
   }
+
   input[type=text],
   textarea,
   input[type=number] {
     color: #fff;
     border: 2px solid #fff;
   }
+
   label {
     color: #fff;
   }
+
   input::placeholder {
     color: #fff;
   }
+
   .navbar {
     border-bottom: 0;
+
     .navbar-item {
       transition: all 150ms linear;
+
       .button {
         color: #333333;
+
         &:hover {
           opacity: 1;
           color: #8373c6;
@@ -121,7 +150,7 @@ export default {
       opacity: 0;
       background: radial-gradient(ellipse at center, rgba(0, 0, 0, .35) 0%, rgba(0, 0, 0, 0) 80%); /* W3C */
       transition-duration: 150ms;
-      transition-property:  opacity;
+      transition-property: opacity;
     }
 
     &:hover {

@@ -47,12 +47,13 @@
               .buttons-list
                 button.buttons.button-primary(
                   type="submit"
-                  :disabled="submitStatus === 'PENDING'"
-                ) Registration
+                )
+                  span(v-if="loading") Loading...
+                  span(v-else) Registration
               .button-list.buttons-list--info
                 p.typo__p(v-if="submitStatus === 'OK'") Thanks for your submission!
                 p.typo__p(v-if="submitStatus === 'ERROR'") Please fill the form correctly.
-                p.typo__p(v-if="submitStatus === 'PENDING'") Sending...
+                p.typo__p(v-else) {{ submitStatus }}
               .button-list.buttons-list--info
                 span Do you have account?
                   router-link(to="/login")  Enter here!
@@ -88,18 +89,25 @@ export default {
       if (this.$v.$invalid) {
         this.submitStatus = 'ERROR'
       } else {
-        console.log('submit!')
-        // do your submit logic here
         const user = {
           email: this.email,
           password: this.password
         }
-        console.log(user)
-        this.submitStatus = 'PENDING'
-        setTimeout(() => {
-          this.submitStatus = 'OK'
-        }, 500)
+        this.$store.dispatch('registerUser', user)
+          .then(() => {
+            console.log('REGISTER')
+            this.submitStatus = 'OK'
+            this.$router.push('/')
+          })
+          .catch(err => {
+            this.submitStatus = err.message
+          })
       }
+    }
+  },
+  computed: {
+    loading () {
+      return this.$store.getters.loading
     }
   }
 }
