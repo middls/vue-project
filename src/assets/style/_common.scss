@@ -1,0 +1,36 @@
+$base-font: 'Montserrat', 'Helvetica', 'Arial',sans-serif;
+
+* {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
+}
+
+body {
+    font-family: $base-font;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: normal;
+}
+
+p, ul, h1, h2, h3, h4, h5, h6 {
+    padding: 0;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}

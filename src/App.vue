@@ -30,7 +30,7 @@
                   v-if="checkUser"
                   @click="logOut"
                 )
-                  span.navbar-link Log Out
+                  span.navbar-link.button.hover-shadow Log Out
     router-view
 </template>
 
@@ -69,6 +69,7 @@ export default {
 </script>
 
 <style lang="scss">
+  @import "assets/style/index";
   body {
     background: linear-gradient(45deg, rgb(19, 73, 95), rgb(118, 75, 226), rgb(131, 115, 198), rgb(119, 211, 185)) fixed;
   }
