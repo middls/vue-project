@@ -1,20 +1,21 @@
+
 <template lang="pug">
   .content-wrapper
     section
       .container
         .task-list__header
-         h1.ui-title-1 Task
-         .buttons-list
-           p {{filter }}
-           .button.button--round.button-default(
-           @click="filter = 'active'"
-           ) Active
-           .button.button--round.button-default(
-           @click="filter = 'completed'"
-           ) Completed
-           .button.button--round.button-default(
-           @click="filter = 'all'"
-           ) All
+          h1.ui-title-1 Task
+          .buttons-list
+            p {{filter }}
+            .button.button--round.button-default(
+              @click="filter = 'active'"
+            ) Active
+            .button.button--round.button-default(
+              @click="filter = 'completed'"
+            ) Completed
+            .button.button--round.button-default(
+              @click="filter = 'all'"
+            ) All
         .task-list
           .task-item(
             v-for="task in tasksFilter"
@@ -45,13 +46,67 @@
                     )
                       .ui-tag
                         span.tag-title {{ tag.title }}
+                    .button-list
+                      .button.button--round.button-default(
+                        @click="taskEdit(task.id, task.title, task.description)"
+                      ) Edit
+                      .button.button--round.button-primary Done
+      .ui-messageBox__wrapper(
+        v-if="editing"
+        :class="{active: editing}"
+      )
+        .ui-messageBox.fadeInDown
+          .ui-messageBox__header
+            span.messageBox-title {{ titleEditing }}
+            span.button-close(@click="cancelTaskEdit")
+          .ui-messageBox__content
+            p Title
+            input(
+              type="text"
+               v-model="titleEditing"
+            )
+            p Description
+            textarea(
+              v-model="desrEditing"
+            )
+          .ui-messageBox__footer
+            .button.button-light(@click="cancelTaskEdit") Cancel
+            .button.button-primary(@click="finishTaskEdit") OK
+
 </template>
 
 <script>
 export default {
   data () {
     return {
-      filter: 'active'
+      filter: 'active',
+      editing: false,
+      titleEditing: '',
+      desrEditing: '',
+      taskId: null
+    }
+  },
+  methods: {
+    taskEdit (id, title, description) {
+      this.editing = !this.editing
+      this.titleEditing = title
+      this.desrEditing = description
+      console.log(this.path)
+    },
+    cancelTaskEdit () {
+      this.editing = !this.editing
+      //  reset
+      this.taskId = null
+      this.titleEditing = ''
+      this.desrEditing = ''
+    },
+    finishTaskEdit () {
+      this.$store.dispatch('editTask', {
+        id: this.taskId,
+        title: this.titleEditing,
+        description: this.desrEditing
+      })
+      this.editing = !this.editing
     }
   },
   computed: {
@@ -103,5 +158,18 @@ export default {
 
   .task-item__body {
     margin-top: 20px;
+  }
+  // modal
+  .ui-messageBox__wrapper {
+    .ui-messageBox {
+      background: linear-gradient(45deg, rgb(19, 73, 95), rgb(118, 75, 226), rgb(131, 115, 198), rgb(119, 211, 185)) fixed;
+    }
+
+    &.active {
+      display: flex;
+    }
+    .button-light {
+      margin-right: 8px;
+    }
   }
 </style>

@@ -3,31 +3,68 @@ import Task from './task_help'
 
 export default {
   state: {
-    tasks: [
-      {
-        'id': 1,
-        'title': 'joker',
-        'description': 'about joker',
-        'whatWatch': 'Film',
-        'completed': false,
-        'editing': false
-      },
-      {
-        'id': 2,
-        'title': 'The Witcher',
-        'description': 'new serial from Netflix',
-        'whatWatch': 'Serial',
-        'completed': true,
-        'editing': false
-      }
-    ]
+    tasks: []
   },
   mutations: {
+    loadTasks (state, payload) {
+      state.tasks = payload
+    },
     newTask (state, payload) {
       state.tasks.push(payload)
+    },
+    editTask (state, { id, title, description }) {
+      const task = state.tasks.find(taskKey => {
+        return taskKey.id === id
+      })
+      task.title = title
+      task.description = description
+      const path = firebase.database().ref('tasks').child(id)
+      console.log(path)
     }
   },
   actions: {
+    async loadTasks ({ commit }, payload) {
+      commit('clearError')
+      commit('setLoading', true)
+      try {
+        const task = await firebase.database().ref('tasks').once('value')
+        console.log(task)
+        const tasks = task.val()
+        const tasksArray = []
+        Object.keys(tasks).forEach(key => {
+          const taskKey = tasks[key]
+          tasksArray.push(
+            new Task(
+              taskKey.title,
+              taskKey.description,
+              taskKey.whatWatch,
+              taskKey.totalTime,
+              taskKey.tags,
+              taskKey.completed,
+              taskKey.editing,
+              taskKey.user,
+              key
+            )
+          )
+        })
+        commit('loadTasks', tasksArray)
+        console.log(tasks)
+        // const newTask = new Task(
+        //   payload.title,
+        //   payload.description,
+        //   payload.whatWatch,
+        //   payload.totalTime,
+        //   payload.tags,
+        //   payload.completed,
+        //   payload.editing,
+        // )
+        commit('setLoading', false)
+      } catch (error) {
+        commit('setLoading', false)
+        commit('setError', error.message)
+        throw error
+      }
+    },
     async newTask ({ commit, getters }, payload) {
       commit('clearError')
       commit('setLoading', true)
@@ -45,7 +82,25 @@ export default {
         const task = await firebase.database().ref('tasks').push(newTask)
         console.log(task)
         commit('newTask', {
+          ...newTask,
+          id: task.key
         })
+        commit('setLoading', false)
+      } catch (error) {
+        commit('setLoading', false)
+        commit('setError', error.message)
+        throw error
+      }
+    },
+    async editTask ({ commit }, { id, title, description }) {
+      commit('clearError')
+      commit('setLoading', true)
+      try {
+        await firebase.database().ref('tasks').child(id).update({
+          title,
+          description
+        })
+        commit('editTask', { id, title, description })
         commit('setLoading', false)
       } catch (error) {
         commit('setLoading', false)
@@ -55,16 +110,18 @@ export default {
     }
   },
   getters: {
-    tasks (state) {
-      return state.tasks
-    },
-    taskCompleted (state) {
+    tasks (state, getters) {
       return state.tasks.filter(task => {
+        return task.user === getters.user.id
+      })
+    },
+    taskCompleted (state, getters) {
+      return getters.tasks.filter(task => {
         return task.completed
       })
     },
-    taskNotCompleted (state) {
-      return state.tasks.filter(task => {
+    taskNotCompleted (state, getters) {
+      return getters.tasks.filter(task => {
         return task.completed === false
       })
     }
